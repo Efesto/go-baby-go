@@ -1,2 +1,2 @@
 run-server:
-	go run server.go
+	go run cmd/server.go

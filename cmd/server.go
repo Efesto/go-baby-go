@@ -1,10 +1,10 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
-	"os"
 
+	"../pkg/city"
+	"../pkg/openweather"
 	"github.com/labstack/echo"
 	"github.com/subosito/gotenv"
 )
@@ -25,17 +25,8 @@ func greetings(context echo.Context) error {
 }
 
 func weather(context echo.Context) error {
-	city := context.Param("city")
-	apiKey := openWeatherAPIKey()
+	city := city.City{Name: context.Param("city")}
 
-	url := "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey
-	resp, _ := http.Get(url)
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-
+	body, _ := openweather.Weather(city)
 	return context.String(http.StatusOK, string(body))
-}
-
-func openWeatherAPIKey() string {
-	return os.Getenv("OPEN_WEATHER_API_KEY")
 }
