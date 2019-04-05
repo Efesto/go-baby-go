@@ -17,7 +17,10 @@ func Weather(city city.City) ([]byte, error) {
 	apiKey := Key()
 
 	url := "https://api.openweathermap.org/data/2.5/weather?q=" + city.Name + "&appid=" + apiKey
-	resp, _ := http.Get(url)
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	resp, err := http.Get(url)
+	if err != nil {
+		defer resp.Body.Close()
+		return ioutil.ReadAll(resp.Body)
+	}
+	return nil, err
 }
