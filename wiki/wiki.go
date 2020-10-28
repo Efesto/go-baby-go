@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 // Page represents a web page
@@ -73,7 +74,6 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	}
 }
 
-
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
@@ -89,7 +89,33 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 	}
 }
 
-var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html"))
+var templates = loadTemplates()
+
+func loadTemplates() *template.Template {
+	templatefiles := []string{"tmpl/edit.html", "tmpl/view.html"}
+	templates := template.New("master")
+	for _, file := range templatefiles {
+		splits := strings.Split(file, "/")
+		templatename := splits[len(splits)-1]
+
+		tmpldata, _ := ioutil.ReadFile(file)
+		tmpl, _ := template.New(templatename).Parse(string(replaceLinks(tmpldata)))
+
+		templates.AddParseTree(templatename, tmpl.Tree)
+	}
+
+	return templates
+}
+
+var interpolationregex = regexp.MustCompile("\\[([a-zA-Z0-9]+)\\]")
+
+func replaceLinks(tmpldata []byte) []byte {
+	return interpolationregex.ReplaceAllFunc(tmpldata, func(data []byte) []byte {
+		group := interpolationregex.ReplaceAllString(string(data), `$1`)
+		newgroup := "<a href='/view/" + group + "'>" + group + "</a>"
+		return []byte(newgroup)
+	})
+}
 
 func main() {
 	http.HandleFunc("/", rootHandler)
