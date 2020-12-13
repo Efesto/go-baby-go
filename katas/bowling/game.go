@@ -47,12 +47,25 @@ func (g *Game) appendFrame(pins int) {
 func (g *Game) Score() int {
 	total := 0
 	addStrikeBonus := false
+	addFirstRollBonus := false
 	addSpareBonus := false
-	for _, frame := range g.frames {
-		total += frame.firstRoll + frame.secondRoll
-
-		if addStrikeBonus {
+	for index, frame := range g.frames {
+		if index < 10 {
 			total += frame.firstRoll + frame.secondRoll
+		}
+
+		if addFirstRollBonus {
+			total += frame.firstRoll
+			addFirstRollBonus = false
+		}
+
+		if addStrikeBonus && index < 11 {
+			if frame.Strike() {
+				total += frame.firstRoll
+				addFirstRollBonus = true
+			} else {
+				total += frame.firstRoll + frame.secondRoll
+			}
 		}
 
 		if addSpareBonus {

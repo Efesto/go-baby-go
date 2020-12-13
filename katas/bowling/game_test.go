@@ -65,6 +65,22 @@ func TestScoreStrike(t *testing.T) {
 	assert.Equal(2, len(game.frames))
 }
 
+func TestScoreStrikeAfterStrike(t *testing.T) {
+	assert := assert.New(t)
+	game := Game{}
+
+	game.Roll(10)
+	assert.Equal(10, game.Score())
+
+	game.Roll(10)
+	assert.Equal(30, game.Score())
+	assert.Equal(2, len(game.frames))
+
+	game.Roll(10)
+	assert.Equal(60, game.Score())
+	assert.Equal(3, len(game.frames))
+}
+
 func TestScoreSpare(t *testing.T) {
 	assert := assert.New(t)
 	game := Game{}
@@ -88,11 +104,11 @@ func TestPerfectGame(t *testing.T) {
 	assert := assert.New(t)
 	game := Game{}
 
-	for i := 0; i < 11; i++ {
+	for i := 0; i < 12; i++ {
 		game.Roll(10)
 	}
 
-	assert.Equal(210, game.Score())
+	assert.Equal(300, game.Score())
 }
 
 func TestMaxFramesWithoutBonus(t *testing.T) {
